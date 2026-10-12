@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.example</groupId>
+    <artifactId>AirHockeyAI</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <dl4j.version>1.0.0-M1.1</dl4j.version>
+    </properties>
+
+    <dependencies>
+        <!-- RL4J Core -->
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>rl4j-core</artifactId>
+            <version>${dl4j.version}</version>
+        </dependency>
+
+        <!-- RL4J Gym (Provides org.deeplearning4j.gym.StepReply) -->
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>rl4j-gym</artifactId>
+            <version>${dl4j.version}</version>
+        </dependency>
+
+        <!-- ND4J Native Math Backend -->
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-native-platform</artifactId>
+            <version>${dl4j.version}</version>
+        </dependency>
+
+        <!-- Processing Core -->
+        <dependency>
+            <groupId>org.processing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.3.7</version>
+        </dependency>
+    </dependencies>
+</project>
