@@ -1,0 +1,25 @@
+#!/bin/sh
+
+# Maximum file size in bytes (95 MB = 99614720 bytes)
+MAX_SIZE=99614720
+LFS_ADDED=0
+
+# Check all staged files
+git diff --cached --name-only -z | while IFS= read -r -d '' file; do
+    if [ -f "$file" ]; then
+        # Get file size in bytes (works on Mac, Linux, and Windows Git Bash)
+        SIZE=$(wc -c < "$file")
+        
+        if [ "$SIZE" -gt "$MAX_SIZE" ]; then
+            echo "File '$file' exceeds 95 MB. Automatically tracking with Git LFS..."
+            git lfs track "$file"
+            git add "$file"
+            LFS_ADDED=1
+        fi
+    fi
+done
+
+# Stage the updated .gitattributes file if any large files were tracked
+if [ -f ".gitattributes" ]; then
+    git add .gitattributes
+fi
