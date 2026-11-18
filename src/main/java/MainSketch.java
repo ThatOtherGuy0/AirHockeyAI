@@ -9,10 +9,10 @@ import processing.core.PApplet;
 
 public class MainSketch extends PApplet {
 
-    private AILogic learningEnvironment;
-    private QLearningDiscreteDense<AILogic.AgentState> qLearningTrainer;
-    private DQNPolicy<AILogic.AgentState> trainedPolicy;
-    private boolean isTraining = true;
+    private AILogic learningEnvironment;//this holds the environment the AI learns in
+    private QLearningDiscreteDense<AILogic.AgentState> qLearningTrainer;//this is the trainer that teaches the AI
+    private DQNPolicy<AILogic.AgentState> trainedPolicy;//this stores the AI brain once it is done training
+    private boolean isTraining = true;//this is the boolean that controls whether or not the AI is still training
 
     public static void main(String[] args) {
         PApplet.main("MainSketch");
@@ -20,29 +20,26 @@ public class MainSketch extends PApplet {
 
     @Override
     public void settings() {
-        size(600, 600);
+        size(600, 600);//this sets the window size
     }
 
     @Override
     public void setup() {
         frameRate(60);
         
-        // 1. Create the RL Environment
-        learningEnvironment = new AILogic(this);
+        learningEnvironment = new AILogic(this);//this creates the learning environment
 
-        // 2. Configure Neural Network Structure
-        DQNDenseNetworkConfiguration neuralNetConfig = DQNDenseNetworkConfiguration.builder()
+        DQNDenseNetworkConfiguration neuralNetConfig = DQNDenseNetworkConfiguration.builder()//this whole chunk sets up the neural network structure
                 .l2(0.001)
                 .updater(new Adam(0.005))
                 .numHiddenNodes(32)
                 .numLayers(2)
                 .build();
 
-        // 3. Configure RL Hyperparameters
-        QLearningConfiguration rlTrainingConfig = QLearningConfiguration.builder()
+        QLearningConfiguration rlTrainingConfig = QLearningConfiguration.builder()//this whole chunk configures the training settings
                 .seed(123L)
                 .maxEpochStep(300)
-                .maxStep(15000)      // Total learning steps
+                .maxStep(15000)//this sets the total learning steps
                 .expRepMaxSize(5000)
                 .batchSize(32)
                 .targetDqnUpdateFreq(100)
@@ -50,51 +47,47 @@ public class MainSketch extends PApplet {
                 .rewardFactor(1.0)
                 .gamma(0.95)
                 .errorClamp(1.0)
-                .minEpsilon(0.05f)   // Minimum random exploration rate
+                .minEpsilon(0.05f)//this sets the minimum random exploration rate
                 .epsilonNbStep(3000)
                 .doubleDQN(true)
                 .build();
 
-        // 4. Create the Q-Learning Trainer
-        qLearningTrainer = new QLearningDiscreteDense<>(learningEnvironment, neuralNetConfig, rlTrainingConfig);
+        qLearningTrainer = new QLearningDiscreteDense<>(learningEnvironment, neuralNetConfig, rlTrainingConfig);//this creates the Q-Learning trainer
 
-        // Run training in background thread so the Processing window opens smoothly
+        //this runs the training in the background so the window does not freeze
         new Thread(() -> {
-            qLearningTrainer.train();
-            trainedPolicy = qLearningTrainer.getPolicy();
-            isTraining = false;
+            qLearningTrainer.train();//this actually starts the AI training
+            trainedPolicy = qLearningTrainer.getPolicy();//this grabs the finished brain
+            isTraining = false;//this tells the program training is done
         }).start();
     }
 
     @Override
     public void draw() {
-        background(30);
+        background(30);//this sets the color of the background
 
-        // Once trained, feed current state into the trained neural policy to choose the best action
-        if (!isTraining && trainedPolicy != null) {
-            AILogic.AgentState currentState = learningEnvironment.reset();
-            Observation currentObservation = new Observation(currentState.getData());
-            int chosenAction = trainedPolicy.nextAction(currentObservation);
-            learningEnvironment.step(chosenAction);
+        if (!isTraining && trainedPolicy != null) {//this makes the AI move on its own once training is finished
+            AILogic.AgentState currentState = learningEnvironment.reset();//this gets the current state of the agent
+            Observation currentObservation = new Observation(currentState.getData());//this turns the state into something the AI can read
+            int chosenAction = trainedPolicy.nextAction(currentObservation);//this picks the best move
+            learningEnvironment.step(chosenAction);//this makes the agent actually do the move
         }
 
-        // Target guide line from agent to mouse
         stroke(100);
-        line(learningEnvironment.position.x, learningEnvironment.position.y, mouseX, mouseY);
+        line(learningEnvironment.position.x, learningEnvironment.position.y, mouseX, mouseY);//this draws the guide line from the agent to the mouse
 
-        // Draw Agent Triangle
+        //this is the end of the AI logic, further code draws the agent
         pushMatrix();
-        translate(learningEnvironment.position.x, learningEnvironment.position.y);
-        rotate(learningEnvironment.currentAngle);
+        translate(learningEnvironment.position.x, learningEnvironment.position.y);//this moves the drawing origin to the agent
+        rotate(learningEnvironment.currentAngle);//this rotates the agent to face the right direction
 
         fill(0, 200, 255);
         stroke(255);
-        triangle(20, 0, -10, -10, -10, 10);
+        triangle(20, 0, -10, -10, -10, 10);//THIS IS THE AGENT
         popMatrix();
 
-        // Display Status Text
         fill(255);
         textSize(14);
-        text(isTraining ? "Status: Training AI..." : "Status: Trained! Following mouse", 20, 30);
+        text(isTraining ? "Status: Training AI..." : "Status: Trained! Following mouse", 20, 30);//this displays whether the AI is training or ready
     }
 }
